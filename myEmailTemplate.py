@@ -37,8 +37,8 @@ template = EmailTemplate(
 	# EXPORT OPTIONS
 	saveAs='2020-09-mbts-eblast-vacation.html',
 	showMsgs=False,
-	minifyHtmlOut=True,
-	exportFile=False
+	minifyHtmlOut=False,
+	exportFile=True
 )
 
 
