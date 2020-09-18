@@ -1,7 +1,13 @@
-# import EmailTemplate Class
+#	
+#	1) import EmailTemplate Class
+#	
 from EmailTemplateProgram.EmailTemplate import EmailTemplate
 
-# generate custom email template
+
+
+#	
+#	2) generate custom email template
+#	
 template = EmailTemplate(
 	# CONTENT INFORMATION
 	extImgUrl='www.getcommunityinc.com/mycommunityapps/eblasts/millville/september_2020/images_jg/',
@@ -32,6 +38,14 @@ template = EmailTemplate(
 	saveAs='2020-09-mbts-eblast-vacation.html',
 	showMsgs=False,
 	minifyHtmlOut=True,
-	exportFile=True
+	exportFile=False
 )
+
+
+
+#	
+#	3) Show or Export Generated Html Email
+#	
 template.getContents()
+
+
