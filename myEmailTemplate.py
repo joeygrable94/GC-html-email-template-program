@@ -10,10 +10,10 @@ from EmailTemplateProgram.EmailTemplate import EmailTemplate
 #	
 template = EmailTemplate(
 	# CONTENT INFORMATION
-	extImgUrl='www.getcommunityinc.com/mycommunityapps/eblasts/millville/september_2020/images_jg/',
-	contentPath='./myEmailTemplateContent/',
-	docTitle='example title',
-	docDesc='example description',
+	extImgUrl='www.getcommunityinc.com/mycommunityapps/eblasts/millville/sept_retiree_2020/',
+	contentPath='./EmailContent/',
+	docTitle='Millville By The Sea | September Newsletter 2020',
+	docDesc='4 miles from Bethany Beach, DE, Millville by the Sea is a new home master-planned community with amenities including pools, lakes, parks, trails and more.',
 	# GENERAL STYLES
 	width=600,
 	tableClass='gc-table--email',
@@ -35,7 +35,7 @@ template = EmailTemplate(
 		display: block;
 	''',
 	# EXPORT OPTIONS
-	saveAs='2020-09-mbts-eblast-vacation.html',
+	saveAs='2020-09-mbts-eblast-retiree.html',
 	showMsgs=False,
 	minifyHtmlOut=False,
 	exportFile=True
