@@ -93,16 +93,18 @@ class EmailTemplate:
 		fullSpan = True # assume full colspan
 		# loop through each content item and build HTML output
 		for c_index, (fileName, (f_type, item_content) ) in enumerate(sorted(self.contents.items())):
-			#print(c_index, fileName, f_type, item_content )
-			# only close row if reached start of a span line
+			# --------------------------------------------------
+			# only open row if reached start of a span line
 			if fullSpan or internalSpan == 0:
 				# open row
 				output += self.openRow()
+			# --------------------------------------------------
 			# do something with html
 			if f_type == 'html':
 				output += self.openColumn(span=currentSpan)
 				output += self.contentHtmlTxt(item_content, self.divStyleDefault)
 				output += self.closeColumn()
+			# --------------------------------------------------
 			# do something with plain img
 			if f_type == 'img':
 				# check img width to span td elm
@@ -119,6 +121,7 @@ class EmailTemplate:
 				# close out column
 				output += self.contentPlainImg(fileName, item_content, self.imgStyleDefault)
 				output += self.closeColumn()
+			# --------------------------------------------------
 			# do something with linked img
 			if f_type == 'link':
 				# check img link width to span td elm
@@ -135,6 +138,7 @@ class EmailTemplate:
 				# close out column
 				output += self.contentLinkedImg(fileName, item_content, self.imgStyleDefault)
 				output += self.closeColumn()
+			# --------------------------------------------------
 			# if the current colspan is less than the maximum allowed
 			if currentSpan < self.spanMax:
 				# subtract colspan from max until reach end of row
@@ -146,14 +150,12 @@ class EmailTemplate:
 				internalSpan = 0
 				# set close row marker
 				fullSpan = True
-			# only close row if row is full
+			# double check reached end of row
 			if fullSpan:
 				# close row
 				output += self.closeRow()
-				# reset full span ref
-				fullSpan = False
-		# close last row/table/body/html elms
-		output += self.closeRow()
+			# --------------------------------------------------
+		# close last table/body/html elms
 		output += self.closeBody()
 		# minify html
 		if self.minify:
@@ -194,8 +196,8 @@ class EmailTemplate:
 		currentMaxSpan = 1
 		# loop through each content item and update the count
 		for c_index, (fileName, (f_type, item_content) ) in enumerate(sorted(self.contents.items())):
-			# imgs only atm — IMPROVE FEATURES TO ALLOW MULTI COL TEXT
-			if f_type == 'img':
+			# ONLY IMAGES and LINKS atm — IMPROVE FEATURES TO ALLOW MULTI COL HTML TEXT
+			if f_type == 'img' or f_type == 'link':
 				# get width
 				itemWidth = item_content[0]
 				# calc perceny
@@ -228,78 +230,78 @@ class EmailTemplate:
 
 	# generate header string
 	def GenerateHeader(self):
-		hstr = '''
-			<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-			<html xmlns="http://www.www.w3.org/1999/xhtml">
-			<head>
-				<title>%s</title>
-				<meta name="description" content="%s">
-				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-			</head>
-			''' % (self.docTitle, self.docDesc)
+		hstr = '''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.www.w3.org/1999/xhtml">
+<head>
+	<title>%s</title>
+	<meta name="description" content="%s">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>''' % (self.docTitle, self.docDesc)
 		return hstr
 
 	# generate body string
 	def GenerateBody(self):
 		bstr = '''
-			<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" style="%s">
-				<table id="%s" width="%d" align="center" border="0" cellpadding="0" cellspacing="0">
-			''' % (self.bodyStyles, self.tableClass, self.width)
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" style="%s">
+	<table id="%s" width="%d" align="center" border="0" cellpadding="0" cellspacing="0">
+''' % (self.bodyStyles, self.tableClass, self.width)
 		return bstr
 
 	# open a new row
 	def openRow(self):
-		srStr = '<tr>'
+		srStr = '\t\t<tr>\n'
 		return srStr
 
 	# open table row element + TD column span
 	def openColumn(self, span=1):
-		ocStr = '<td colspan="%d">\n' % span
+		ocStr = '\t\t\t<td colspan="%d">\n' % span
 		return ocStr
 
 	# content - html
 	def contentHtmlTxt(self, cObj, styleStr):
-		htmlStr = '<div style="%s">\n%s\n</div>\n' % (styleStr, cObj)
+		htmlStr = '\t\t\t\t<div style="%s">\n\t\t\t\t\t%s\n\t\t\t\t</div>\n' % (styleStr, cObj)
 		return htmlStr
 
 	# content - plain img
 	def contentPlainImg(self, fName, cObj, styleStr):
 		imgId = fName.split('.',1)[0]
-		imgSrc = 'http://'+self.externalImgUrl+fName
+		imgExt = fName[-4:]
+		imgName = fName.split('-link-',1)[0]
+		imgSrc = 'https://'+self.externalImgUrl+imgName
 		imgStyles = styleStr
-		pImgStr = '<img id="%s" src="%s" width="%d" height="%d" border="0" style="%s" alt="" />\n' % (imgId, imgSrc, cObj[0], cObj[1], imgStyles)
+		pImgStr = '''\t\t\t\t<img id="%s" src="%s" width="%d" height="%d" border="0" style="%s" alt="" />\n''' % (imgId, imgSrc, cObj[0], cObj[1], imgStyles)
 		return pImgStr
 
 	# content - linked img
 	def contentLinkedImg(self, fName, cObj, styleStr):
-		linkTo = 'http://'+self.getLinkFromImagePath(fName).replace(':','/')
+		linkBase = 'http://'+self.getLinkFromImagePath(fName).replace(':','/')
+		linkTo = linkBase[:-4]
 		imgId = fName.split('.',1)[0]
-		imgSrc = self.externalImgUrl+fName
+		imgExt = fName[-4:]
+		imgName = fName.split('-link-',1)[0]+imgExt
+		imgSrc = 'https://'+self.externalImgUrl+imgName
 		imgStyles = styleStr
-		lImgStr = '''
-			<a href="%s" target="_blank">
-				<img id="%s" src="%s" width="%d" height="%d" border="0" style="%s" alt="" />
-			</a>
-		''' % (linkTo, imgId, imgSrc, cObj[0], cObj[1], imgStyles)
+		lImgStr = '''\t\t\t\t<a href="%s" target="_blank"><img id="%s" src="%s" width="%d" height="%d" border="0" style="%s" alt="" /></a>''' % (linkTo, imgId, imgSrc, cObj[0], cObj[1], imgStyles)
 		return lImgStr
 
 	# close table row element + TD column span
 	def closeColumn(self):
-		ccStr = '</td>\n'
+		ccStr = '\t\t\t</td>\n'
 		return ccStr
 
 	# close table row
 	def closeRow(self):
-		crStr = '</tr>\n'
+		crStr = '\t\t</tr>\n'
 		return crStr
 
 	# close out table and body elements
 	def closeBody(self):
 		bstr = '''
-					</table>
-				</body>
-			</html>
-			'''
+	</table>
+</body>
+</html>'''
 		return bstr
 
 	# ---------------------------------------------------------------------------
